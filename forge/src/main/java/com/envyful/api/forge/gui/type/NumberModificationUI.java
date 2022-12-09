@@ -13,7 +13,6 @@ import com.envyful.api.gui.item.Displayable;
 import com.envyful.api.gui.pane.Pane;
 import com.envyful.api.player.EnvyPlayer;
 import com.envyful.api.player.PlayerManager;
-import com.envyful.api.type.Pair;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -66,18 +65,16 @@ public class NumberModificationUI {
             config.confirm.open();
         });
 
-        for (Pair<Integer, Integer> position : config.config.currentValue.getPositions()) {
-            if (config.config.currentValue.isEnabled()) {
-                pane.set(position.getX(), position.getY(),
-                         GuiFactory.displayable(new ItemBuilder(UtilConfigItem.fromConfigItem(config.config.currentValue, config.transformers))
-                                                        .name(UtilChatColour.translateColourCodes(
-                                                                '&',
-                                                                config.config.currentValue.getName()
-                                                                        .replace("%value%", config.currentValue + "")
-                                                        ))
-                                                        .build())
-                );
-            }
+        if (config.config.currentValue.isEnabled()) {
+            pane.set(config.config.currentValue.getXPos(), config.config.currentValue.getYPos(),
+                     GuiFactory.displayable(new ItemBuilder(UtilConfigItem.fromConfigItem(config.config.currentValue, config.transformers))
+                                                    .name(UtilChatColour.translateColourCodes(
+                                                            '&',
+                                                            config.config.currentValue.getName()
+                                                                    .replace("%value%", config.currentValue + "")
+                                                    ))
+                                                    .build())
+            );
         }
 
         for (PositionableConfigItem displayItem : config.displayConfigItems) {

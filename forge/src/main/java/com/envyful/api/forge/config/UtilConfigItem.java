@@ -5,16 +5,12 @@ import com.envyful.api.config.type.PermissibleConfigItem;
 import com.envyful.api.config.type.PositionableConfigItem;
 import com.envyful.api.forge.chat.UtilChatColour;
 import com.envyful.api.forge.items.ItemBuilder;
-import com.envyful.api.forge.items.ItemFlag;
 import com.envyful.api.forge.player.util.UtilPlayer;
 import com.envyful.api.gui.Transformer;
 import com.envyful.api.gui.factory.GuiFactory;
 import com.envyful.api.gui.item.Displayable;
 import com.envyful.api.gui.pane.Pane;
 import com.envyful.api.player.EnvyPlayer;
-import com.envyful.api.type.Pair;
-import com.envyful.api.type.UtilParse;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -49,13 +45,11 @@ public class UtilConfigItem {
             return;
         }
 
-        for (Pair<Integer, Integer> position : configItem.getPositions()) {
-            if (clickHandler == null) {
-                pane.set(position.getX(), position.getY(), GuiFactory.displayable(itemStack));
-            } else {
-                pane.set(position.getX(), position.getY(), GuiFactory.displayableBuilder(itemStack)
-                        .clickHandler(clickHandler).build());
-            }
+        if (clickHandler == null) {
+            pane.set(configItem.getXPos(), configItem.getYPos(), GuiFactory.displayable(itemStack));
+        } else {
+            pane.set(configItem.getXPos(), configItem.getYPos(), GuiFactory.displayableBuilder(itemStack)
+                    .clickHandler(clickHandler).build());
         }
     }
 
@@ -78,18 +72,16 @@ public class UtilConfigItem {
             return;
         }
 
-        for (Pair<Integer, Integer> position : configItem.getPositions()) {
-            if (clickHandler == null) {
-                pane.set(position.getX(), position.getY(), GuiFactory.displayable(fromConfigItem(
-                        configItem,
-                        transformers
-                )));
-            } else {
-                pane.set(position.getX(), position.getY(), GuiFactory.displayableBuilder(fromConfigItem(
-                        configItem,
-                        transformers
-                )).clickHandler(clickHandler).build());
-            }
+        if (clickHandler == null) {
+            pane.set(configItem.getXPos(), configItem.getYPos(), GuiFactory.displayable(fromConfigItem(
+                    configItem,
+                    transformers
+            )));
+        } else {
+            pane.set(configItem.getXPos(), configItem.getYPos(), GuiFactory.displayableBuilder(fromConfigItem(
+                    configItem,
+                    transformers
+            )).clickHandler(clickHandler).build());
         }
     }
 
@@ -127,23 +119,16 @@ public class UtilConfigItem {
 
         ItemBuilder itemBuilder = new ItemBuilder()
                 .type(Item.getByNameOrId(configItem.getType()))
-                .amount(configItem.getAmount(transformers))
-                .damage(configItem.getDamage(transformers));
+                .amount(configItem.getAmount())
+                .damage(configItem.getDamage());
 
         List<String> lore = configItem.getLore();
-        List<String> flags = configItem.getFlags();
 
         if (!transformers.isEmpty()) {
             for (Transformer transformer : transformers) {
                 lore = transformer.transformLore(lore);
                 name = transformer.transformName(name);
-                flags = transformer.transformLore(flags);
             }
-        }
-
-        for (String flag : flags) {
-            ItemFlag foundFlag = ItemFlag.valueOf(flag.toUpperCase());
-            itemBuilder.itemFlag(foundFlag);
         }
 
         for (String s : lore) {
@@ -152,109 +137,44 @@ public class UtilConfigItem {
 
         itemBuilder.name(UtilChatColour.translateColourCodes('&', name));
 
-        for (ConfigItem.EnchantData value : configItem.getEnchants().values()) {
-            String enchantName = value.getEnchant();
-            String level = value.getLevel();
+        for (Map.Entry<String, ConfigItem.NBTValue> nbtData : configItem.getNbt().entrySet()) {
+            String data = nbtData.getValue().getData();
 
             if (!transformers.isEmpty()) {
                 for (Transformer transformer : transformers) {
-                    enchantName = transformer.transformName(enchantName);
-                    level = transformer.transformName(level);
+                    data = transformer.transformName(data);
                 }
             }
 
-            Enchantment enchantment = Enchantment.getEnchantmentByLocation(enchantName);
-            int parsedLevel = UtilParse.parseInteger(level).orElse(1);
-
-            if (enchantment == null) {
-                continue;
+            NBTBase base = null;
+            switch (nbtData.getValue().getType().toLowerCase()) {
+                case "int" : case "integer" :
+                    base = new NBTTagInt(Integer.parseInt(data));
+                    break;
+                case "long" :
+                    base = new NBTTagLong(Long.parseLong(data));
+                    break;
+                case "byte" :
+                    base = new NBTTagByte(Byte.parseByte(data));
+                    break;
+                case "double" :
+                    base = new NBTTagDouble(Double.parseDouble(data));
+                    break;
+                case "float" :
+                    base = new NBTTagFloat(Float.parseFloat(data));
+                    break;
+                case "short" :
+                    base = new NBTTagShort(Short.parseShort(data));
+                    break;
+                default : case "string" :
+                    base = new NBTTagString(data);
+                    break;
             }
 
-            itemBuilder.enchant(enchantment, parsedLevel);
-        }
-
-        for (Map.Entry<String, ConfigItem.NBTValue> nbtData : configItem.getNbt().entrySet()) {
-            Pair<String, NBTBase> parsed = parseNBT(nbtData, transformers);
-
-            if (parsed != null) {
-                itemBuilder.nbt(parsed.getX(), parsed.getY());
-            }
+            itemBuilder.nbt(nbtData.getKey(), base);
         }
 
         return itemBuilder.build();
     }
 
-    public static Pair<String, NBTBase> parseNBT(Map.Entry<String, ConfigItem.NBTValue> nbtEntry, List<Transformer> transformers) {
-        if (nbtEntry.getValue().getType().equalsIgnoreCase("nbt")) {
-            NBTTagCompound compound = new NBTTagCompound();
-
-            for (Map.Entry<String, ConfigItem.NBTValue> entry : nbtEntry.getValue().getSubData().entrySet()) {
-                Pair<String, NBTBase> parsed = parseNBT(entry, transformers);
-
-                if (parsed != null) {
-                    compound.setTag(parsed.getX(), parsed.getY());
-                }
-            }
-
-            return Pair.of(nbtEntry.getKey(), compound);
-        }
-
-        if (nbtEntry.getValue().getType().equalsIgnoreCase("list")) {
-            NBTTagList list = new NBTTagList();
-
-            for (Map.Entry<String, ConfigItem.NBTValue> nbtValue : nbtEntry.getValue().getSubData().entrySet()) {
-                Pair<String, NBTBase> parsed = parseNBT(nbtValue, transformers);
-
-                if (parsed != null) {
-                    NBTTagCompound compound = new NBTTagCompound();
-                    compound.setTag(parsed.getX(), parsed.getY());
-                    list.appendTag(compound);
-                }
-            }
-
-            return Pair.of(nbtEntry.getKey(), list);
-        }
-
-        return Pair.of(nbtEntry.getKey(), parseBasic(nbtEntry.getValue(), transformers));
-    }
-
-    public static NBTBase parseBasic(ConfigItem.NBTValue value, List<Transformer> transformers) {
-        String data = value.getData();
-
-        if (!transformers.isEmpty()) {
-            for (Transformer transformer : transformers) {
-                data = transformer.transformName(data);
-            }
-        }
-
-        NBTBase base;
-
-        switch (value.getType().toLowerCase()) {
-            case "int":
-            case "integer":
-                base = new NBTTagInt(Integer.parseInt(data));
-                break;
-            case "long":
-                base = new NBTTagLong(Long.parseLong(data));
-                break;
-            case "byte":
-                base = new NBTTagByte(Byte.parseByte(data));
-                break;
-            case "double":
-                base = new NBTTagDouble(Double.parseDouble(data));
-                break;
-            case "float":
-                base = new NBTTagFloat(Float.parseFloat(data));
-                break;
-            case "short":
-                base = new NBTTagShort(Short.parseShort(data));
-                break;
-            default:
-            case "string":
-                base = new NBTTagString(data);
-                break;
-        }
-
-        return base;
-    }
 }

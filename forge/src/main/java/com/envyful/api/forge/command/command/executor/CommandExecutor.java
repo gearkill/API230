@@ -169,46 +169,54 @@ public class CommandExecutor {
      * @return If the command failed to run
      */
     public boolean execute(ICommandSender sender, String[] arguments) {
-        Object[] args = new Object[this.arguments.length + 1 + (justArgsPos != -1 ? 1 : 0)];
+        Object[] args = new Object[this.arguments.length];
+        int subtract = 0;
         int skipped = 0;
 
         for (int i = 0; i < this.arguments.length; i++) {
             Pair<ArgumentInjector<?, ICommandSender>, String> argument = this.arguments[i];
-            int commandArgsPos = i - skipped;
-            int executorPos = i + 1;
+
+            if (argument == null) {
+                args[i] = null;
+                ++subtract;
+                continue;
+            }
 
             if (argument.getX().doesRequireMultipleArgs()) {
-                String[] remainingArgs = Arrays.copyOfRange(arguments, commandArgsPos, arguments.length);
+                String[] remainingArgs = Arrays.copyOfRange(arguments, i - subtract, arguments.length);
 
-                if (remainingArgs.length == 0 && argument.getY() != null) {
+                if ((remainingArgs == null || remainingArgs.length == 0) && argument.getY() != null) {
                     remainingArgs = new String[] { argument.getY() };
                 }
 
-                args[executorPos] = argument.getX().instantiateClass(sender, remainingArgs);
+                args[i] = argument.getX().instantiateClass(sender, remainingArgs);
 
-                if (args[executorPos] == null) {
+                if (args[i] == null) {
                     return false;
                 }
             } else {
-                if (arguments.length <= 0 || arguments.length <= commandArgsPos) {
-                    args[executorPos] = argument.getX().instantiateClass(sender, argument.getY());
+                if (arguments.length <= 0 || arguments.length <= (i - subtract) || (i - subtract) < 0) {
+                    args[i] = argument.getX().instantiateClass(sender, argument.getY());
 
-                    if (args[executorPos] == null) {
+                    if (args[i] == null) {
                         return false;
                     } else {
+                        ++subtract;
+                        ++skipped;
                         continue;
                     }
                 }
 
-                args[executorPos] = argument.getX().instantiateClass(sender, arguments[commandArgsPos]);
+                args[i] = argument.getX().instantiateClass(sender, arguments[i - subtract]);
 
-                if (args[executorPos] == null) {
+                if (args[i] == null) {
                     if (argument.getY() != null) {
-                        args[executorPos] = argument.getX().instantiateClass(sender, argument.getY());
+                        args[i] = argument.getX().instantiateClass(sender, argument.getY());
 
-                        if (args[executorPos] == null) {
+                        if (args[i] == null) {
                             return false;
                         } else {
+                            ++subtract;
                             ++skipped;
                         }
                     } else {
@@ -219,10 +227,10 @@ public class CommandExecutor {
         }
 
         if (this.sender.getType().equals(sender.getClass())) {
-            args[0] = sender;
+            args[this.senderPosition] = sender;
         } else {
             try {
-                args[0] = this.sender.getType().cast(sender);
+                args[this.senderPosition] = this.sender.getType().cast(sender);
             } catch (ClassCastException e) {
                 FMLCommonHandler.instance().getFMLLogger().info("You cannot use this command from this source (player only).");
                 return false;
@@ -234,7 +242,7 @@ public class CommandExecutor {
                 arguments = new String[0];
             }
 
-            args[args.length - 1] = arguments;
+            args[this.justArgsPos] = Arrays.copyOfRange(arguments, this.arguments.length - 2 - skipped, arguments.length);
         }
 
         return this.execute(args);
@@ -264,30 +272,17 @@ public class CommandExecutor {
     }
 
     public <A> List<String> tabComplete(ICommandSender sender, String[] args) {
-        if (this.tabCompleters == null || this.tabCompleters.isEmpty()) {
+        if (this.tabCompleters.isEmpty() || this.tabCompleters == null || this.requiredArgs == -1) {
             return Collections.emptyList();
         }
 
-        int pos = Math.min(Math.max(this.requiredArgs, 0), Math.max(args.length - 1, 0));
-        TabCompleter<?, A> completer = (TabCompleter<?, A>) this.tabCompleters.get(Math.min(pos, this.tabCompleters.size()));
+        int pos = Math.min(this.requiredArgs, Math.max(args.length - 1, 0));
+        TabCompleter<?, A> completer = (TabCompleter<?, A>) this.tabCompleters.get(pos);
 
         if (completer instanceof FillerTabCompleter) {
             return Collections.emptyList();
         }
 
-        A castSender = completer.getSenderClass().cast(sender);
-        List<String> completions = completer.getCompletions(castSender, args, this.extraTabData.get(pos));
-
-        if (this.arguments[pos] != null && this.arguments[pos].getY() != null) {
-            if (this.tabCompleters.size() > (pos + 1)) {
-                TabCompleter<?, A> tabCompleter = (TabCompleter<?, A>) this.tabCompleters.get(pos + 1);
-
-                if (!(completer instanceof FillerTabCompleter)) {
-                    completions.addAll(tabCompleter.getCompletions(castSender, args, this.extraTabData.get(pos + 1)));
-                }
-            }
-        }
-
-        return completions;
+        return completer.getCompletions(completer.getSenderClass().cast(sender), args, this.extraTabData.get(pos));
     }
 }
