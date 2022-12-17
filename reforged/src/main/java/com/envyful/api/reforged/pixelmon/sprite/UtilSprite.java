@@ -207,6 +207,7 @@ public class UtilSprite {
 							.replace("%tier%", ((int) (pokemon.getPersistentData().getInteger("gearfriends:super")) - 1) + "")
 							.replace("%poder%", ((int) pokemon.getPersistentData().getInteger("gearfriends:poder")) + "")
 							.replace("%raridade%", pokemon.getPersistentData().getString("gearfriends:skinrarity"))
+							.replace("%rank%", pokemon.getPersistentData().getString("gearfriends:pokemonrank"))
                     .replace("%friendship%", pokemon.getFriendship() + "");
 
             if (extraStats instanceof MewStats) {
