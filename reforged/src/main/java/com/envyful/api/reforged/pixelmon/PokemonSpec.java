@@ -71,11 +71,11 @@ public class PokemonSpec {
      */
     public List<String> getDescription(String colour, String offColour) {
         List<String> desc = Lists.newArrayList(
-                colour + "Species: " + offColour + this.species
+                colour + "Pokémon: " + offColour + this.species
         );
 
         if (this.gender != null) {
-            desc.add(colour + "Gender: "+ offColour + this.gender.getLocalizedName());
+            desc.add(colour + "Gênero: "+ offColour + this.gender.getLocalizedName());
         }
 
         if (this.ivRequirement != null) {
@@ -83,7 +83,7 @@ public class PokemonSpec {
         }
 
         if (this.growths != null && !this.growths.isEmpty()) {
-            desc.add(colour + "Growths: ");
+            desc.add(colour + "Tamanho: ");
 
             for (EnumGrowth growth : this.growths) {
                 desc.add(colour + " • " + offColour + growth.getLocalizedName());
@@ -91,7 +91,7 @@ public class PokemonSpec {
         }
 
         if (this.natures != null && !this.natures.isEmpty()) {
-            desc.add(colour + "Natures: ");
+            desc.add(colour + "Nature: ");
 
             for (EnumNature nature : this.natures) {
                 desc.add(colour + " • " + offColour + nature.getLocalizedName());
@@ -273,7 +273,7 @@ public class PokemonSpec {
             itemStack.setTagCompound(tagCompound);
             tagCompound.setShort("ndex", (short) this.spec.species.getNationalPokedexInteger());
 
-            itemStack.setStackDisplayName("§eHunting for §6§l" + this.spec.species.getPokemonName());
+            itemStack.setStackDisplayName("§eCaçando por §6§l" + this.spec.species.getPokemonName());
             UtilItemStack.setLore(itemStack, this.getDescription());
 
             return itemStack;
@@ -287,9 +287,9 @@ public class PokemonSpec {
                 );
 
                 if (this.spec.allowEvolutions) {
-                    this.description.add("§7• Evolutions are allowed");
+                    this.description.add("§7• Evoluções estão disponiveis");
                 } else {
-                    this.description.add("§7• Evolutions are not allowed");
+                    this.description.add("§7• Evoluções não estão disponiveis");
                 }
 
                 if (this.spec.gender != null) {
@@ -297,7 +297,7 @@ public class PokemonSpec {
                 }
 
                 if (!this.spec.natures.isEmpty()) {
-                    this.description.add("§7• Natures: ");
+                    this.description.add("§7• Nature: ");
 
                     for (EnumNature nature : this.spec.natures) {
                         this.description.add("  §7• " + nature.getName());
@@ -305,7 +305,7 @@ public class PokemonSpec {
                 }
 
                 if (!this.spec.growths.isEmpty()) {
-                    this.description.add("§7• Growths: ");
+                    this.description.add("§7• Tamanho: ");
 
                     for (EnumGrowth growth : this.spec.growths) {
                         this.description.add("  §7• " + growth.name());
@@ -313,7 +313,7 @@ public class PokemonSpec {
                 }
 
                 if (this.spec.ivRequirement != null) {
-                    this.description.add("§7• IV Requirement: " + this.spec.ivRequirement.get() + "%");
+                    this.description.add("§7• IV Necessário: " + this.spec.ivRequirement.get() + "%");
                 }
             }
 
