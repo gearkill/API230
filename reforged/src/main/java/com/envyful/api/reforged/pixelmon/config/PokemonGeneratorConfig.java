@@ -23,13 +23,14 @@ public class PokemonGeneratorConfig {
     private int minIVPercentage;
     private int maxIVPercentage;
     private boolean onlyLegends;
+    private boolean particles;
 
     public PokemonGeneratorConfig(Set<EnumSpecies> blockedTypes, boolean speciesRequirement, boolean allowLegends,
                                   boolean allowUltraBeasts, boolean genderRequirement, boolean growthRequirement,
                                   boolean natureRequirement, int potentialGrowthRequirements,
                                   int potentialNatureRequirements, boolean allowEvolutions, boolean ivRequirement,
                                   boolean randomIVGeneration, int minIVPercentage, int maxIVPercentage,
-                                  boolean onlyLegends) {
+                                  boolean onlyLegends, boolean particles) {
         this.blockedTypes = blockedTypes;
         this.speciesRequirement = speciesRequirement;
         this.allowLegends = allowLegends;
@@ -45,6 +46,7 @@ public class PokemonGeneratorConfig {
         this.minIVPercentage = minIVPercentage;
         this.maxIVPercentage = maxIVPercentage;
         this.onlyLegends = onlyLegends;
+        this.particles = particles;
     }
 
     public PokemonGeneratorConfig() {
@@ -108,5 +110,9 @@ public class PokemonGeneratorConfig {
 
     public boolean isOnlyLegends() {
         return this.onlyLegends;
+    }
+
+    public boolean isParticle() {
+        return this.particles;
     }
 }

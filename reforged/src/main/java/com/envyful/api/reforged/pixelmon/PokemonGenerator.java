@@ -36,11 +36,12 @@ public class PokemonGenerator {
     private final int minIVPercentage;
     private final int maxIVPercentage;
     private final boolean onlyLegends;
+    private boolean particles;
 
     private PokemonGenerator(Set<EnumSpecies> blockedTypes, boolean speciesRequirement, boolean allowLegends, boolean allowUltraBeasts, boolean genderRequirement,
                              boolean growthRequirement, boolean natureRequirement, int potentialGrowthRequirements, int potentialNatureRequirements,
                              boolean allowEvolutions, boolean ivRequirement, boolean randomIVGeneration,
-                             int minIVPercentage, int maxIVPercentage, boolean onlyLegends) {
+                             int minIVPercentage, int maxIVPercentage, boolean onlyLegends, boolean particles) {
         this.blockedTypes = blockedTypes;
         this.speciesRequirement = speciesRequirement;
         this.allowLegends = allowLegends;
@@ -56,6 +57,7 @@ public class PokemonGenerator {
         this.minIVPercentage = minIVPercentage;
         this.maxIVPercentage = maxIVPercentage;
         this.onlyLegends = onlyLegends;
+        this.particles = particles;
     }
 
     public PokemonGenerator(PokemonGeneratorConfig config) {
@@ -63,7 +65,7 @@ public class PokemonGenerator {
              config.isAllowUltraBeasts(), config.isGenderRequirement(), config.isGrowthRequirement(),
              config.isNatureRequirement(), config.getPotentialGrowthRequirements(),
              config.getPotentialNatureRequirements(), config.isAllowEvolutions(), config.isIvRequirement(),
-             config.isRandomIVGeneration(), config.getMinIVPercentage(), config.getMaxIVPercentage(), config.isOnlyLegends()
+             config.isRandomIVGeneration(), config.getMinIVPercentage(), config.getMaxIVPercentage(), config.isOnlyLegends(), config.isParticle()
         );
     }
 
@@ -165,11 +167,17 @@ public class PokemonGenerator {
         private int minIVPercentage = 0;
         private int maxIVPercentage = 100;
         private boolean legendsOnly = false;
+        private boolean particles = false;
 
         protected Builder() {}
 
         public Builder setAllowLegends(boolean allowLegends) {
             this.allowLegends = allowLegends;
+            return this;
+        }
+
+        public Builder setAllowParticles(boolean particles) {
+            this.particles = particles;
             return this;
         }
 
@@ -257,7 +265,7 @@ public class PokemonGenerator {
                     this.ivRequirement,
                     this.randomIVGeneration,
                     this.minIVPercentage,
-                    this.maxIVPercentage, this.legendsOnly);
+                    this.maxIVPercentage, this.legendsOnly,this.particles this.);
         }
     }
 }
