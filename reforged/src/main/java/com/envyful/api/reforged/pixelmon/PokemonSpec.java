@@ -31,16 +31,18 @@ public class PokemonSpec {
     protected final Requirement<Integer> ivRequirement;
     protected final List<EnumNature> natures;
     protected final List<EnumGrowth> growths;
+    protected final boolean particle;
 
     protected PokemonSpec(EnumSpecies species, boolean allowEvolutions, Gender gender,
                          Requirement<Integer> ivRequirement,
-                        List<EnumNature> natures, List<EnumGrowth> growths) {
+                        List<EnumNature> natures, List<EnumGrowth> growths, boolean particle) {
         this.species = species;
         this.allowEvolutions = allowEvolutions;
         this.gender = gender;
         this.ivRequirement = ivRequirement;
         this.natures = natures;
         this.growths = growths;
+        this.particle = particle;
     }
 
     /**
@@ -61,6 +63,10 @@ public class PokemonSpec {
      */
     public String getDisplayName() {
         return this.species.getLocalizedName();
+    }
+
+    public Boolean getParticle() {
+        return this.particle;
     }
 
     /**
@@ -203,6 +209,7 @@ public class PokemonSpec {
 
         private EnumSpecies species = null;
         private boolean allowEvolutions = false;
+        private boolean allowParticles = false;
         private Gender gender = null;
         private Requirement<Integer> ivRequirement = null;
         private List<EnumNature> natures = Lists.newArrayList();
@@ -217,6 +224,11 @@ public class PokemonSpec {
 
         public Builder allowEvolutions(boolean allowEvolutions) {
             this.allowEvolutions = allowEvolutions;
+            return this;
+        }
+
+        public Builder allowParticles(boolean allowParticles) {
+            this.allowParticles = allowParticles;
             return this;
         }
 
@@ -252,7 +264,7 @@ public class PokemonSpec {
 
         public PokemonSpec build() {
             return new PokemonSpec(this.species, this.allowEvolutions, this.gender, this.ivRequirement, this.natures,
-                    this.growths);
+                    this.growths, this.allowParticles);
         }
     }
 
