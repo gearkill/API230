@@ -54,7 +54,7 @@ dependencies {
         exclude group: 'net.minecraftforge'
     }
 
-    compileOnly fg.deobf('pixelmon:Pixelmon-1.12.2-8.4.2-server:8.4.2')
+    compileOnly ('pixelmon:Pixelmon-1.12.2-8.4.2-server:8.4.2')
 }
 
 shadowJar {

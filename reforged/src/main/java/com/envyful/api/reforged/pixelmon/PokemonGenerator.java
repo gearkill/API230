@@ -265,7 +265,7 @@ public class PokemonGenerator {
                     this.ivRequirement,
                     this.randomIVGeneration,
                     this.minIVPercentage,
-                    this.maxIVPercentage, this.legendsOnly,this.particles this.);
+                    this.maxIVPercentage, this.legendsOnly,this.particles);
         }
     }
 }
