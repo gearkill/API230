@@ -30,7 +30,7 @@ public class PokemonGeneratorConfig {
                                   boolean natureRequirement, int potentialGrowthRequirements,
                                   int potentialNatureRequirements, boolean allowEvolutions, boolean ivRequirement,
                                   boolean randomIVGeneration, int minIVPercentage, int maxIVPercentage,
-                                  boolean onlyLegends, boolean particles) {
+                                  boolean onlyLegends, boolean particles ) {
         this.blockedTypes = blockedTypes;
         this.speciesRequirement = speciesRequirement;
         this.allowLegends = allowLegends;
